@@ -1,0 +1,16 @@
+{
+  "classes": [
+    "pothole",
+    "vehicle_car",
+    "vehicle_bus",
+    "vehicle_truck",
+    "vehicle_motorcycle",
+    "traffic_sign",
+    "traffic_light",
+    "road_divider",
+    "zebra_crossing",
+    "waterlogging",
+    "pedestrian",
+    "streetlight"
+  ]
+}
