@@ -1,54 +1,54 @@
 [
     {
-        "event_id": "EV001",
+        "event_id": "EDGE006",
         "defect_type": "pothole",
-        "risk_score": 100,
-        "priority": "CRITICAL",
-        "factors": {
-            "severity_score": 75,
-            "sighting_count": 5.0,
-            "recency_weight": 1.0,
-            "recurrence_score": 40.0,
-            "severity_trend_slope": 2.5,
-            "severity_trend_score": 12.5,
-            "congestion_score": 75.0,
-            "congestion_contribution": 11.25,
-            "bottleneck": true,
-            "bottleneck_score": 10.0
-        }
-    },
-    {
-        "event_id": "EV002",
-        "defect_type": "pothole",
-        "risk_score": 46.0,
+        "risk_score": 48.0,
         "priority": "MEDIUM",
         "factors": {
-            "severity_score": 50,
-            "sighting_count": 2.0,
-            "recency_weight": 1.0,
-            "recurrence_score": 16.0,
-            "severity_trend_slope": 0.5,
-            "severity_trend_score": 2.5,
-            "congestion_score": 50.0,
-            "congestion_contribution": 7.5,
-            "bottleneck": false,
-            "bottleneck_score": 0.0
-        }
-    },
-    {
-        "event_id": "EV003",
-        "defect_type": "waterlogging_risk",
-        "risk_score": 21.75,
-        "priority": "LOW",
-        "factors": {
-            "severity_score": 25,
+            "severity_score": 100,
             "sighting_count": 1,
             "recency_weight": 1.0,
             "recurrence_score": 8.0,
             "severity_trend_slope": 0.0,
             "severity_trend_score": 0.0,
-            "congestion_score": 25.0,
-            "congestion_contribution": 3.75,
+            "congestion_score": 0,
+            "congestion_contribution": 0.0,
+            "bottleneck": false,
+            "bottleneck_score": 0.0
+        }
+    },
+    {
+        "event_id": "EDGE007",
+        "defect_type": "pothole",
+        "risk_score": 38.0,
+        "priority": "MEDIUM",
+        "factors": {
+            "severity_score": 75,
+            "sighting_count": 1,
+            "recency_weight": 1.0,
+            "recurrence_score": 8.0,
+            "severity_trend_slope": -2.0,
+            "severity_trend_score": 0.0,
+            "congestion_score": 0,
+            "congestion_contribution": 0.0,
+            "bottleneck": false,
+            "bottleneck_score": 0.0
+        }
+    },
+    {
+        "event_id": "EDGE008",
+        "defect_type": "pothole",
+        "risk_score": 42.25,
+        "priority": "MEDIUM",
+        "factors": {
+            "severity_score": 25.0,
+            "sighting_count": 2.0,
+            "recency_weight": 1.0,
+            "recurrence_score": 16.0,
+            "severity_trend_slope": 1.0,
+            "severity_trend_score": 5.0,
+            "congestion_score": 75.0,
+            "congestion_contribution": 11.25,
             "bottleneck": false,
             "bottleneck_score": 0.0
         }
