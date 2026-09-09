@@ -1,56 +1,55 @@
-[
-    {
-        "event_id": "EDGE006",
+{
+    "event_id": "TEST_005",
+    "defect_type": "pothole",
+    "severity": "high",
+    "latitude": 28.6,
+    "longitude": 77.2,
+    "timestamp_ms": 800,
+    "timestamp": "2026-09-10T01:45:00+05:30",
+    "vehicle_count": 100,
+    "current_vehicle_count": 100,
+    "avg_speed": 5,
+    "congestion_level": "HIGH",
+    "waterlogging_detected": false,
+    "priority": {
+        "event_id": "TEST_005",
         "defect_type": "pothole",
-        "risk_score": 48.0,
-        "priority": "MEDIUM",
-        "factors": {
-            "severity_score": 100,
-            "sighting_count": 1,
-            "recency_weight": 1.0,
-            "recurrence_score": 8.0,
-            "severity_trend_slope": 0.0,
-            "severity_trend_score": 0.0,
-            "congestion_score": 0,
-            "congestion_contribution": 0.0,
-            "bottleneck": false,
-            "bottleneck_score": 0.0
-        }
-    },
-    {
-        "event_id": "EDGE007",
-        "defect_type": "pothole",
-        "risk_score": 38.0,
-        "priority": "MEDIUM",
+        "risk_score": 100,
+        "priority": "CRITICAL",
         "factors": {
             "severity_score": 75,
-            "sighting_count": 1,
+            "sighting_count": 20.0,
             "recency_weight": 1.0,
-            "recurrence_score": 8.0,
-            "severity_trend_slope": -2.0,
-            "severity_trend_score": 0.0,
-            "congestion_score": 0,
-            "congestion_contribution": 0.0,
-            "bottleneck": false,
-            "bottleneck_score": 0.0
-        }
-    },
-    {
-        "event_id": "EDGE008",
-        "defect_type": "pothole",
-        "risk_score": 42.25,
-        "priority": "MEDIUM",
-        "factors": {
-            "severity_score": 25.0,
-            "sighting_count": 2.0,
-            "recency_weight": 1.0,
-            "recurrence_score": 16.0,
-            "severity_trend_slope": 1.0,
-            "severity_trend_score": 5.0,
+            "recurrence_score": 160.0,
+            "severity_trend_slope": 8.0,
+            "severity_trend_score": 40.0,
             "congestion_score": 75.0,
             "congestion_contribution": 11.25,
-            "bottleneck": false,
-            "bottleneck_score": 0.0
+            "bottleneck": true,
+            "bottleneck_score": 10.0
+        }
+    },
+    "prediction": {
+        "prediction_score": 85.0,
+        "prediction_level": "HIGH",
+        "recurrence_score": 20.0,
+        "severity_trend_score": 40,
+        "congestion_trend_score": 15.0,
+        "recent_observation_score": 10
+    },
+    "waterlogging_risk": {
+        "latitude": 28.6,
+        "longitude": 77.2,
+        "waterlogging_risk_score": 0,
+        "waterlogging_risk_level": "LOW",
+        "factors": [],
+        "weather": {
+            "latitude": 28.6,
+            "longitude": 77.2,
+            "temperature": 27.3,
+            "precipitation": 0.0,
+            "rain": 0.0,
+            "precipitation_probability": 2
         }
     }
-]
+}

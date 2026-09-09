@@ -1,0 +1,29 @@
+{
+    "event_id": "TEST_005",
+    "defect_type": "pothole",
+    "severity": "high",
+
+    "latitude": 28.6,
+    "longitude": 77.2,
+
+    "timestamp_ms": 800,
+    "timestamp": "2026-09-10T01:45:00+05:30",
+
+    "vehicle_count": 100,
+    "current_vehicle_count": 100,
+    "avg_speed": 5,
+    "congestion_level": "HIGH",
+
+    "sighting_count": 20,
+    "recency_weight": 1.0,
+    "severity_trend_slope": 8,
+    "congestion_trend": 100,
+    "recent_observation": true,
+
+    "waterlogging_detected": false,
+    "recent_waterlogging": false,
+    "historical_waterlogging": false,
+    "road_vulnerability": false,
+
+    "bottleneck": true
+}
