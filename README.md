@@ -23,7 +23,7 @@ Detect → Assess → Act → Verify → Learn — transforming public transport
 FRONTEND:React.js,Tailwind CSS,Javascript\
 DATABASE:PostgreSQL,PostGIS\
 BACKEND:FastAPI,Python,Unicorn\
-MACHINE LEARNING:Python, YOLO, PyTorch, OpenCV\
+COMPUTER VISION:Python, YOLO, PyTorch, OpenCV\
 ALERTS:Firebase Cloud Messaging\
 CLOUD AND DEPLOYMENT:AWS\
 6.ARCHITECTURE:\
