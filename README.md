@@ -21,7 +21,7 @@ Detect → Assess → Act → Verify → Learn — transforming public transport
  * Closed-Loop Repair Verification subsequent bus passes the location & AI checks Detect → Act → Verify → Learn\
 5:TECHNOLOGY STACK:\
 FRONTEND:React.js,Tailwind CSS,Javascript\
-DATABASE:PostgreSQL\
+DATABASE:PostgreSQL,PostGIS\
 BACKEND:FastAPI,Python,Unicorn\
 MACHINE LEARNING:Python, YOLO, PyTorch, OpenCV\
 ALERTS:Firebase Cloud Messaging\
