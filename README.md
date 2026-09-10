@@ -9,7 +9,7 @@ Potholes, waterlogging, damaged infrastructure & road hazards →  often address
 Fixed CCTV & manual inspections → limited, static & intermittent coverage →  roads gets unmonitored
 Existing monitoring largely identifies what has already happened, rather than forecasting → no Predictive Risk Intelligence
 Absence of automated prioritization and authority routing can delay intervention & waste maintenance resources.
-After an issue is reported as resolved →  limited automated verification → no continuous accountability loop
+After an issue is reported as resolved →  limited automated verification → no continuous accountability loop\
 3.PROPOSED SOLUTION:\
 Our platform turns ordinary public buses into a city-wide network of AI-powered mobile sensors. As buses move through the city, edge AI analyses their camera feeds to detect potholes, damaged infrastructure, traffic anomalies, waterlogging, and safety events in real time. These observations are fused with CCTV, inspection, historical, and contextual data on a centralized GIS-based intelligence layer, where incidents are cross-validated across multiple buses, assigned dynamic risk scores, and automatically routed to the responsible authority.
 Beyond simply detecting problems, the system creates a closed-loop urban response: once an issue is reported and repaired, subsequent buses passing through the same location allow AI to repeatedly verify the repair. Multiple independent verification passes confirm that the issue has been successfully resolved before it is closed, with the outcome fed back into the system for continuous learning.\
