@@ -1,334 +1,240 @@
+import json
 from datetime import datetime, timezone
 from typing import Any, Dict
-import json
-import math
-import os
 
 
 # ============================================================
-# M5 - PRIORITY / RISK ENGINE
+# Priority Engine - M5
 # ============================================================
 
-# ------------------------------------------------------------
-# File paths
-# ------------------------------------------------------------
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-INPUT_FILE = os.path.join(BASE_DIR, "test_data.json")
-OUTPUT_FILE = os.path.join(BASE_DIR, "output.json")
-
-
-# ------------------------------------------------------------
 # Priority thresholds
-# ------------------------------------------------------------
-
 LOW_THRESHOLD = 25
 MEDIUM_THRESHOLD = 50
 HIGH_THRESHOLD = 75
 
-
-# ------------------------------------------------------------
-# Weights used in risk calculation
-# ------------------------------------------------------------
-
+# Weights used by the risk calculation
 SIGHTING_WEIGHT = 8.0
 SEVERITY_TREND_WEIGHT = 5.0
 CONGESTION_WEIGHT = 0.15
-BOTTLENECK_WEIGHT = 10.0
+BOTTLENECK_BONUS = 10.0
 
 
-# ============================================================
-# HELPER FUNCTIONS
-# ============================================================
-
-def clamp(value: float, minimum: float = 0, maximum: float = 100) -> float:
-    """
-    Keep a value between minimum and maximum.
-    """
+def clamp(value: float, minimum: float = 0.0, maximum: float = 100.0) -> float:
+    """Keep a value between minimum and maximum."""
     return max(minimum, min(value, maximum))
 
 
 def normalize(value: float, minimum: float, maximum: float) -> float:
     """
-    Convert a value from a given range into 0-100.
+    Convert a value into a 0-100 range.
     """
     if maximum <= minimum:
         return 0.0
 
-    return clamp(
-        ((value - minimum) / (maximum - minimum)) * 100
-    )
+    score = ((value - minimum) / (maximum - minimum)) * 100
+    return clamp(score)
 
 
-def calculate_recency_weight(timestamp: Any) -> float:
+def calculate_recency_weight(
+    timestamp: str,
+    current_time: datetime | None = None
+) -> float:
     """
-    Recent observations get a higher weight.
+    Calculate a recency weight.
 
-    Uses approximately a 24-hour half-life.
+    Very recent events receive a higher weight.
+    Older events gradually become less important.
+
+    Returns a value between 0 and 1.
     """
 
-    if timestamp is None:
-        return 1.0
+    if not timestamp:
+        return 0.5
 
     try:
+        event_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
 
-        # If timestamp is numeric, treat it as Unix timestamp.
-        if isinstance(timestamp, (int, float)):
-            event_time = datetime.fromtimestamp(
-                timestamp,
-                tz=timezone.utc
-            )
+        if event_time.tzinfo is None:
+            event_time = event_time.replace(tzinfo=timezone.utc)
 
-        else:
-            timestamp_string = str(timestamp)
-
-            # Handle timestamps ending in Z
-            if timestamp_string.endswith("Z"):
-                timestamp_string = timestamp_string[:-1] + "+00:00"
-
-            event_time = datetime.fromisoformat(timestamp_string)
-
-            # If no timezone is provided, assume UTC.
-            if event_time.tzinfo is None:
-                event_time = event_time.replace(tzinfo=timezone.utc)
-
-        now = datetime.now(timezone.utc)
+        if current_time is None:
+            current_time = datetime.now(timezone.utc)
 
         age_hours = max(
             0,
-            (now - event_time).total_seconds() / 3600
+            (current_time - event_time).total_seconds() / 3600
         )
 
-        # 24-hour half-life
-        weight = math.pow(0.5, age_hours / 24)
+        # Recency decreases as the event becomes older.
+        # Half-life is approximately 24 hours.
+        recency = 1 / (1 + (age_hours / 24))
 
-        return clamp(weight, 0, 1)
+        return clamp(recency, 0.0, 1.0)
 
-    except Exception:
-        # If timestamp is invalid, don't crash the whole system.
-        return 1.0
+    except (ValueError, TypeError):
+        return 0.5
 
 
 def severity_to_score(severity: Any) -> float:
     """
     Convert severity into a 0-100 score.
+
+    Accepted values:
+        low / small
+        medium
+        high / large
+        critical / severe
     """
 
-    if severity is None:
-        return 25.0
-
-    severity_string = str(severity).strip().lower()
-
-    severity_map = {
-        "low": 25,
-        "small": 25,
-
-        "medium": 50,
-        "moderate": 50,
-
-        "high": 75,
-        "large": 75,
-
-        "critical": 100,
-        "severe": 100
-    }
-
-    # If severity is already numeric
     if isinstance(severity, (int, float)):
         return clamp(float(severity))
 
-    return severity_map.get(severity_string, 25.0)
-
-
-def congestion_to_score(congestion_level: Any) -> float:
-    """
-    Convert M2's congestion level into a numerical score.
-
-    M2 outputs:
-        LOW
-        MEDIUM
-        HIGH
-
-    M5 converts these into numerical values for risk calculation.
-    """
-
-    if congestion_level is None:
+    if not severity:
         return 0.0
 
-    # If M2 or another module already gives a number,
-    # use it directly.
-    if isinstance(congestion_level, (int, float)):
-        return clamp(float(congestion_level))
+    severity = str(severity).strip().lower()
 
-    level = str(congestion_level).strip().lower()
-
-    congestion_map = {
+    severity_scores = {
         "low": 25.0,
+        "small": 25.0,
         "medium": 50.0,
+        "moderate": 50.0,
         "high": 75.0,
-        "critical": 100.0
+        "large": 75.0,
+        "critical": 100.0,
+        "severe": 100.0,
     }
 
-    return congestion_map.get(level, 0.0)
+    return severity_scores.get(severity, 0.0)
 
-
-# ============================================================
-# CONGESTION CALCULATION
-# ============================================================
-
-def calculate_congestion_score(event: Dict[str, Any]) -> float:
-    """
-    Determine congestion contribution to the risk score.
-
-    Priority:
-
-    1. Use congestion_score if supplied.
-    2. Otherwise use congestion_level from M2.
-    3. Otherwise estimate congestion from vehicle count
-       and average speed.
-    """
-
-    # --------------------------------------------------------
-    # Case 1: numerical congestion score already supplied
-    # --------------------------------------------------------
-
-    if event.get("congestion_score") is not None:
-
-        try:
-            return clamp(
-                float(event["congestion_score"])
-            )
-
-        except (ValueError, TypeError):
-            pass
-
-
-    # --------------------------------------------------------
-    # Case 2: M2 gives LOW / MEDIUM / HIGH
-    # --------------------------------------------------------
-
-    if event.get("congestion_level") is not None:
-
-        score = congestion_to_score(
-            event["congestion_level"]
-        )
-
-        if score > 0:
-            return score
-
-
-    # --------------------------------------------------------
-    # Case 3: derive congestion from traffic data
-    # --------------------------------------------------------
-
-    vehicle_count = event.get("vehicle_count", 0)
-    average_speed = event.get("average_speed")
-
-    try:
-        vehicle_count = float(vehicle_count)
-    except (ValueError, TypeError):
-        vehicle_count = 0.0
-
-    try:
-        average_speed = float(average_speed)
-    except (ValueError, TypeError):
-        average_speed = None
-
-
-    # High vehicle density
-    density_score = normalize(
-        vehicle_count,
-        0,
-        50
-    )
-
-    # Lower speed = higher congestion
-    if average_speed is not None:
-
-        speed_score = clamp(
-            100 - normalize(
-                average_speed,
-                0,
-                60
-            )
-        )
-
-    else:
-        speed_score = 0.0
-
-
-    # Combine density and speed
-    if average_speed is not None:
-        return (
-            density_score * 0.6
-            + speed_score * 0.4
-        )
-
-    return density_score
-
-
-# ============================================================
-# PRIORITY CALCULATION
-# ============================================================
 
 def calculate_priority(event: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Calculate the final risk score and priority
-    for one event.
+    Calculate the priority of a road/traffic event.
+
+    Expected event fields may include:
+
+        event_id
+        defect_type
+        severity
+        vehicle_count
+        traffic_density
+        average_speed
+        congestion_level
+        congestion_score
+        bottleneck
+        sighting_count
+        severity_trend_slope
+        timestamp
+        latitude
+        longitude
+
+    Returns:
+
+        {
+            "event_id": ...,
+            "risk_score": ...,
+            "priority": ...,
+            "factors": {...}
+        }
     """
 
     # --------------------------------------------------------
-    # Basic event information
+    # 1. Read input values
     # --------------------------------------------------------
 
-    event_id = event.get(
-        "event_id",
-        "unknown_event"
+    event_id = event.get("event_id")
+
+    severity = event.get("severity", "low")
+
+    vehicle_count = float(event.get("vehicle_count", 0) or 0)
+
+    traffic_density = float(
+        event.get("traffic_density", 0) or 0
     )
 
-    defect_type = event.get(
-        "defect_type",
-        event.get("type", "unknown")
+    average_speed = float(
+        event.get("average_speed", 0) or 0
     )
 
-    severity = event.get(
-        "severity",
-        "low"
+    congestion_level = float(
+        event.get("congestion_level", 0) or 0
     )
+
+    congestion_score_input = event.get("congestion_score")
+
+    bottleneck = event.get("bottleneck", False)
+
+    sighting_count = int(
+        event.get("sighting_count", 1) or 1
+    )
+
+    severity_trend_slope = float(
+        event.get("severity_trend_slope", 0) or 0
+    )
+
+    timestamp = event.get("timestamp")
 
     # --------------------------------------------------------
-    # Severity score
+    # 2. Calculate severity score
     # --------------------------------------------------------
 
-    severity_score = severity_to_score(
-        severity
-    )
-
+    severity_score = severity_to_score(severity)
 
     # --------------------------------------------------------
-    # Recurrence / repeated sightings
+    # 3. Calculate congestion score
     # --------------------------------------------------------
 
-    sighting_count = event.get(
-        "sighting_count",
-        1
-    )
-
-    try:
-        sighting_count = max(
-            1,
-            float(sighting_count)
+    if congestion_score_input is not None:
+        congestion_score = clamp(
+            float(congestion_score_input)
         )
 
-    except (ValueError, TypeError):
-        sighting_count = 1.0
+    elif congestion_level > 0:
+        congestion_score = clamp(congestion_level)
 
+    else:
+        # Estimate congestion from vehicle count and speed.
+        #
+        # Higher vehicle count + lower speed = higher congestion.
+        vehicle_score = normalize(
+            vehicle_count,
+            minimum=0,
+            maximum=100
+        )
 
-    recency_weight = calculate_recency_weight(
-        event.get("timestamp")
-    )
+        if average_speed <= 0:
+            speed_score = 100.0
+        else:
+            speed_score = normalize(
+                max(0, 60 - average_speed),
+                minimum=0,
+                maximum=60
+            )
 
+        congestion_score = (
+            0.5 * vehicle_score +
+            0.5 * speed_score
+        )
+
+    # --------------------------------------------------------
+    # 4. Calculate recency
+    # --------------------------------------------------------
+
+    recency_weight = calculate_recency_weight(timestamp)
+
+    # --------------------------------------------------------
+    # 5. Calculate recurrence risk
+    # --------------------------------------------------------
+    #
+    # SIH implementation formula:
+    #
+    # risk_score =
+    #     (sighting_count * recency_weight)
+    #     +
+    #     (severity_trend_slope * weight)
+    #
+    # --------------------------------------------------------
 
     recurrence_score = (
         sighting_count
@@ -336,383 +242,189 @@ def calculate_priority(event: Dict[str, Any]) -> Dict[str, Any]:
         * SIGHTING_WEIGHT
     )
 
-
-    # --------------------------------------------------------
-    # Severity trend
-    # --------------------------------------------------------
-
-    severity_trend_slope = event.get(
-        "severity_trend_slope",
-        0
-    )
-
-    try:
-        severity_trend_slope = float(
-            severity_trend_slope
-        )
-
-    except (ValueError, TypeError):
-        severity_trend_slope = 0.0
-
-
-    # Only worsening severity contributes.
     severity_trend_score = (
-        max(0, severity_trend_slope)
+        max(0.0, severity_trend_slope)
         * SEVERITY_TREND_WEIGHT
     )
 
-
     # --------------------------------------------------------
-    # Congestion
-    # --------------------------------------------------------
-
-    congestion_score = calculate_congestion_score(
-        event
-    )
-
-    congestion_contribution = (
-        congestion_score
-        * CONGESTION_WEIGHT
-    )
-
-
-    # --------------------------------------------------------
-    # Bottleneck
+    # 6. Bottleneck contribution
     # --------------------------------------------------------
 
-    bottleneck = event.get(
-        "bottleneck",
-        False
-    )
-
-    # Handle strings such as "true" / "false"
     if isinstance(bottleneck, str):
-
-        bottleneck = bottleneck.strip().lower() in (
+        bottleneck_detected = bottleneck.lower() in {
             "true",
             "yes",
-            "1"
-        )
+            "1",
+            "detected"
+        }
+    else:
+        bottleneck_detected = bool(bottleneck)
 
     bottleneck_score = (
-        BOTTLENECK_WEIGHT
-        if bottleneck
+        BOTTLENECK_BONUS
+        if bottleneck_detected
         else 0.0
     )
 
+    # --------------------------------------------------------
+    # 7. Congestion contribution
+    # --------------------------------------------------------
 
-    # ========================================================
-    # FINAL RISK SCORE
-    # ========================================================
+    congestion_contribution = (
+        congestion_score * CONGESTION_WEIGHT
+    )
+
+    # --------------------------------------------------------
+    # 8. Combine everything
+    # --------------------------------------------------------
 
     raw_score = (
-
-        # Severity is the main factor
         severity_score * 0.40
-
-        # Repeated sightings
         + recurrence_score
-
-        # Worsening condition
         + severity_trend_score
-
-        # Traffic/congestion
         + congestion_contribution
-
-        # Bottleneck bonus
         + bottleneck_score
     )
 
-
-    risk_score = clamp(
-        raw_score
+    risk_score = round(
+        clamp(raw_score),
+        2
     )
 
-
-    # ========================================================
-    # PRIORITY LEVEL
-    # ========================================================
+    # --------------------------------------------------------
+    # 9. Convert score into priority tier
+    # --------------------------------------------------------
 
     if risk_score >= HIGH_THRESHOLD:
-
         priority = "CRITICAL"
 
     elif risk_score >= MEDIUM_THRESHOLD:
-
         priority = "HIGH"
 
     elif risk_score >= LOW_THRESHOLD:
-
         priority = "MEDIUM"
 
     else:
-
         priority = "LOW"
 
-
-    # ========================================================
-    # OUTPUT
-    # ========================================================
+    # --------------------------------------------------------
+    # 10. Return explainable result
+    # --------------------------------------------------------
 
     return {
-
         "event_id": event_id,
-
-        "defect_type": defect_type,
-
-        "risk_score": round(
-            risk_score,
-            2
-        ),
-
+        "risk_score": risk_score,
         "priority": priority,
 
         "factors": {
-
-            "severity_score": round(
-                severity_score,
-                2
-            ),
-
+            "severity_score": round(severity_score, 2),
+            "congestion_score": round(congestion_score, 2),
             "sighting_count": sighting_count,
+            "recency_weight": round(recency_weight, 3),
+            "severity_trend_slope": severity_trend_slope,
+            "bottleneck": bottleneck_detected,
+            "vehicle_count": vehicle_count,
+            "traffic_density": traffic_density,
+            "average_speed": average_speed,
+        },
 
-            "recency_weight": round(
-                recency_weight,
-                4
-            ),
+        "location": {
+            "latitude": event.get("latitude"),
+            "longitude": event.get("longitude"),
+        },
 
-            "recurrence_score": round(
-                recurrence_score,
-                2
-            ),
-
-            "severity_trend_slope": round(
-                severity_trend_slope,
-                2
-            ),
-
-            "severity_trend_score": round(
-                severity_trend_score,
-                2
-            ),
-
-            "congestion_score": round(
-                congestion_score,
-                2
-            ),
-
-            "congestion_contribution": round(
-                congestion_contribution,
-                2
-            ),
-
-            "bottleneck": bottleneck,
-
-            "bottleneck_score": round(
-                bottleneck_score,
-                2
-            )
-        }
+        "timestamp": timestamp,
     }
 
 
 # ============================================================
-# LOAD INPUT
+# M3 → M5 Integration
 # ============================================================
 
-def load_input() -> Any:
-
-    if not os.path.exists(INPUT_FILE):
-
-        print(
-            f"ERROR: Input file not found: {INPUT_FILE}"
-        )
-
-        return []
-
-    try:
-
-        with open(
-            INPUT_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            data = json.load(file)
-
-        return data
-
-    except json.JSONDecodeError as error:
-
-        print(
-            "ERROR: test_data.json contains invalid JSON."
-        )
-
-        print(error)
-
-        return []
-
-    except Exception as error:
-
-        print(
-            f"ERROR while reading input: {error}"
-        )
-
-        return []
+def load_m3_data(input_file: str) -> list:
+    """Load traffic data generated by M3."""
+    with open(input_file, "r", encoding="utf-8") as file:
+        return json.load(file)
 
 
-# ============================================================
-# SAVE OUTPUT
-# ============================================================
+def convert_m3_to_m5(frame: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert one M3 traffic frame into an M5 priority event."""
 
-def save_output(results: list):
+    congestion_map = {
+        "LOW": 25,
+        "MEDIUM": 50,
+        "HIGH": 75,
+    }
 
-    try:
+    congestion_level = str(
+        frame.get("congestion_level", "LOW")
+    ).upper()
 
-        with open(
-            OUTPUT_FILE,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            json.dump(
-                results,
-                file,
-                indent=4
-            )
-
-        print(
-            f"\nOutput saved to: {OUTPUT_FILE}"
-        )
-
-    except Exception as error:
-
-        print(
-            f"ERROR while saving output: {error}"
-        )
-
-
-# ============================================================
-# MAIN
-# ============================================================
-
-def main():
-
-    print("=" * 60)
-    print("M5 PRIORITY ENGINE")
-    print("=" * 60)
-
-    print(
-        f"\nReading input from:\n{INPUT_FILE}"
+    congestion_score = congestion_map.get(
+        congestion_level,
+        0
     )
 
-    data = load_input()
+    return {
+        "event_id": f"TRAFFIC-{frame.get('frame_id')}",
+        "defect_type": "traffic_congestion",
+
+        # Use M3 congestion level as M5 severity
+        "severity": congestion_level.lower(),
+
+        # Directly from M3
+        "vehicle_count": frame.get("vehicle_count", 0),
+        "average_speed": frame.get("avg_speed", 0),
+
+        # M3 does not provide traffic_density,
+        # so we leave it at 0 for now.
+        "traffic_density": 0,
+
+        # Convert LOW/MEDIUM/HIGH into M5's 0-100 score
+        "congestion_level": congestion_score,
+        "congestion_score": congestion_score,
+
+        # These fields are not provided by M3
+        "bottleneck": False,
+        "sighting_count": 1,
+        "severity_trend_slope": 0,
+
+        # M3 timestamp_ms is elapsed simulation time,
+        # not an ISO timestamp, so use current processing time.
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+
+        # Directly from M3
+        "latitude": frame.get("latitude"),
+        "longitude": frame.get("longitude"),
+    }
 
 
-    # --------------------------------------------------------
-    # Accept either:
-    #
-    # 1. A list of events
-    #
-    # [
-    #   {...},
-    #   {...}
-    # ]
-    #
-    # OR
-    #
-    # 2. An object containing "events"
-    #
-    # {
-    #   "events": [...]
-    # }
-    # --------------------------------------------------------
+def process_m3_data(
+    input_file: str = "traffic_congestion.json",
+    output_file: str = "output.json"
+) -> None:
+    """Read M3 data, calculate M5 priority, and save output."""
 
-    if isinstance(data, dict):
-
-        events = data.get(
-            "events",
-            []
-        )
-
-    elif isinstance(data, list):
-
-        events = data
-
-    else:
-
-        print(
-            "ERROR: Input must be a JSON list or an object containing 'events'."
-        )
-
-        return
-
-
-    print(
-        f"\nEvents loaded: {len(events)}"
-    )
-
+    m3_data = load_m3_data(input_file)
 
     results = []
 
+    for frame in m3_data:
+        m5_event = convert_m3_to_m5(frame)
+        result = calculate_priority(m5_event)
+        results.append(result)
 
-    # --------------------------------------------------------
-    # Process every event
-    # --------------------------------------------------------
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(results, file, indent=2)
 
-    for index, event in enumerate(events, start=1):
-
-        if not isinstance(event, dict):
-
-            print(
-                f"Skipping event {index}: not a JSON object."
-            )
-
-            continue
-
-
-        result = calculate_priority(
-            event
-        )
-
-        results.append(
-            result
-        )
-
-
-        print(
-            f"\nEvent {index}: "
-            f"{result['event_id']}"
-        )
-
-        print(
-            f"Risk Score: "
-            f"{result['risk_score']}"
-        )
-
-        print(
-            f"Priority: "
-            f"{result['priority']}"
-        )
-
-
-    # --------------------------------------------------------
-    # Save final output
-    # --------------------------------------------------------
-
-    save_output(
-        results
-    )
-
-
-    print("\n" + "=" * 60)
-    print("M5 PRIORITY ENGINE COMPLETE")
-    print("=" * 60)
+    print(f"Processed {len(results)} traffic frames.")
+    print(f"M5 results saved to {output_file}")
 
 
 # ============================================================
-# RUN
+# Run M3 → M5 → output.json
 # ============================================================
 
 if __name__ == "__main__":
-    main()
+    process_m3_data()
