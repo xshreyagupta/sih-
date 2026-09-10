@@ -1,0 +1,133 @@
+[
+  {
+    "event_id": 1,
+    "event_type": "defect",
+    "class_name": "pothole",
+    "latitude": 28.7041,
+    "longitude": 77.1025,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 2,
+    "event_type": "defect",
+    "class_name": "pothole",
+    "latitude": 28.706,
+    "longitude": 77.105,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 3,
+    "event_type": "defect",
+    "class_name": "alligator_crack",
+    "latitude": 28.708,
+    "longitude": 77.1075,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 4,
+    "event_type": "defect",
+    "class_name": "pothole",
+    "latitude": 28.7041,
+    "longitude": 77.1025,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 5,
+    "event_type": "defect",
+    "class_name": "pothole",
+    "latitude": 28.9999,
+    "longitude": 77.9999,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 6,
+    "event_type": "defect",
+    "class_name": "pothole",
+    "latitude": 28.7041,
+    "longitude": 77.1025,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 7,
+    "event_type": "defect",
+    "class_name": "alligator_crack",
+    "latitude": 28.704636,
+    "longitude": 77.103206,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 8,
+    "event_type": "defect",
+    "class_name": "signboard_missing",
+    "latitude": 28.706,
+    "longitude": 77.105,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "event_id": 9,
+    "event_type": "defect",
+    "class_name": "signboard_missing",
+    "latitude": 28.71,
+    "longitude": 77.11,
+    "verification_result": "verified_closed",
+    "confidence": null
+  },
+  {
+    "location_id": "L002",
+    "event_type": "infrastructure",
+    "expected_infrastructure": "speed_limit_sign",
+    "detected_infrastructure": "speed_limit_sign",
+    "latitude": 22.572641,
+    "longitude": 88.363941,
+    "verification_result": "verified_present",
+    "confidence": 0.71
+  },
+  {
+    "location_id": "L004",
+    "event_type": "infrastructure",
+    "expected_infrastructure": "speed_limit_sign",
+    "detected_infrastructure": "speed_limit_sign",
+    "latitude": 22.572655,
+    "longitude": 88.363955,
+    "verification_result": "verified_present",
+    "confidence": 0.71
+  },
+  {
+    "location_id": "L005",
+    "event_type": "infrastructure",
+    "expected_infrastructure": "traffic_light",
+    "detected_infrastructure": "school_ahead_sign",
+    "latitude": 22.57265,
+    "longitude": 88.36395,
+    "verification_result": "verified_wrong",
+    "confidence": 0.86
+  },
+  {
+    "location_id": "L006",
+    "event_type": "infrastructure",
+    "expected_infrastructure": "zebra_crossing",
+    "detected_infrastructure": "zebra_crossing",
+    "latitude": 22.572658,
+    "longitude": 88.363958,
+    "verification_result": "verified_present",
+    "confidence": 0.43
+  },
+  {
+    "location_id": "L007",
+    "event_type": "infrastructure",
+    "expected_infrastructure": "road_divider",
+    "detected_infrastructure": "school_ahead_sign",
+    "latitude": 22.57267,
+    "longitude": 88.36397,
+    "verification_result": "verified_wrong",
+    "confidence": 0.86
+  }
+]

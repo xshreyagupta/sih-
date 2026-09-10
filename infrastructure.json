@@ -1,0 +1,47 @@
+[
+  {
+    "location_id": "L002",
+    "latitude": 22.572641,
+    "longitude": 88.363941,
+    "expected_infrastructure": "speed_limit_sign",
+    "detected_infrastructure": "speed_limit_sign",
+    "status": "PRESENT",
+    "confidence": 0.4468
+  },
+  {
+    "location_id": "L004",
+    "latitude": 22.572655,
+    "longitude": 88.363955,
+    "expected_infrastructure": "speed_limit_sign",
+    "detected_infrastructure": "speed_limit_sign",
+    "status": "PRESENT",
+    "confidence": 0.7191
+  },
+  {
+    "location_id": "L005",
+    "latitude": 22.57265,
+    "longitude": 88.36395,
+    "expected_infrastructure": "traffic_light",
+    "detected_infrastructure": "school_ahead_sign",
+    "status": "WRONG",
+    "confidence": 0.875
+  },
+  {
+    "location_id": "L006",
+    "latitude": 22.572658,
+    "longitude": 88.363958,
+    "expected_infrastructure": "zebra_crossing",
+    "detected_infrastructure": "zebra_crossing",
+    "status": "PRESENT",
+    "confidence": 0.4813
+  },
+  {
+    "location_id": "L007",
+    "latitude": 22.57267,
+    "longitude": 88.36397,
+    "expected_infrastructure": "road_divider",
+    "detected_infrastructure": null,
+    "status": "MISSING",
+    "confidence": null
+  }
+]
