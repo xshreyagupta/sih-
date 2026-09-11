@@ -1,0 +1,16 @@
+path: /Users/shreyagupta/Desktop/sih/sih-/SmartRoad-M1/data
+train: train/images
+val: valid/images
+test: test/images
+names:
+  0: no_parking_sign
+  1: pedestrian_crossing_sign
+  2: road_divider
+  3: road_work_ahead_sign
+  4: school_ahead_sign
+  5: speed_limit_sign
+  6: stop_sign
+  7: streetlight
+  8: traffic_light
+  9: zebra_crossing
+nc: 10

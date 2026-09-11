@@ -1,1 +1,0 @@
-pbpaste > /Users/shreyagupta/Desktop/sih/sih-/prototype_2/Frontend/src/pages/Verification.jsx
