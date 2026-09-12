@@ -1,0 +1,101 @@
+[
+  {
+    "class_name": "pothole",
+    "severity": "medium",
+    "latitude": 28.7041,
+    "longitude": 77.1025,
+    "detected_at": "2026-09-05T20:44:22.273686",
+    "authority": {
+      "id": 1,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "pothole",
+    "severity": "medium",
+    "latitude": 28.706,
+    "longitude": 77.105,
+    "detected_at": "2026-09-05T20:52:27.062867",
+    "authority": {
+      "id": 1,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "alligator_crack",
+    "severity": "medium",
+    "latitude": 28.708,
+    "longitude": 77.1075,
+    "detected_at": "2026-09-05T20:52:27.495037",
+    "authority": {
+      "id": 4,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "pothole",
+    "severity": "medium",
+    "latitude": 28.7041,
+    "longitude": 77.1025,
+    "detected_at": "2026-09-06T16:37:00.689827",
+    "authority": {
+      "id": 1,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "pothole",
+    "severity": "medium",
+    "latitude": 28.9999,
+    "longitude": 77.9999,
+    "detected_at": "2026-09-06T16:45:06.214268",
+    "authority": {
+      "id": 1,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "pothole",
+    "severity": "medium",
+    "latitude": 28.7041,
+    "longitude": 77.1025,
+    "detected_at": "2026-09-09T01:13:15.660375",
+    "authority": {
+      "id": 1,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "alligator_crack",
+    "severity": "medium",
+    "latitude": 28.704636,
+    "longitude": 77.103206,
+    "detected_at": "2026-09-09T01:13:15.865731",
+    "authority": {
+      "id": 4,
+      "name": "PWD"
+    }
+  },
+  {
+    "class_name": "signboard_missing",
+    "severity": "medium",
+    "latitude": 28.706,
+    "longitude": 77.105,
+    "detected_at": "2026-09-10T00:39:01.365046",
+    "authority": {
+      "id": 6,
+      "name": "Traffic Police"
+    }
+  },
+  {
+    "class_name": "signboard_missing",
+    "severity": "medium",
+    "latitude": 28.71,
+    "longitude": 77.11,
+    "detected_at": "2026-09-10T00:39:01.568675",
+    "authority": {
+      "id": 6,
+      "name": "Traffic Police"
+    }
+  }
+]
